@@ -100,20 +100,64 @@
             .grid-2 { grid-template-columns: 1fr !important; gap: 0 !important; }
             .export-btns { flex-direction: column; }
         }
+
+        /* --- ESTILOS DA TELA DE LOGIN --- */
+        #loginScreen { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            width: 100%; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            background: radial-gradient(circle at top center, #1a1a1a 0%, var(--bg-body) 100%);
+            z-index: 9999; 
+        }
+        .login-box { 
+            background: #111; 
+            padding: 40px; 
+            border-radius: 8px; 
+            border: 1px solid var(--primary); 
+            box-shadow: 0 0 30px rgba(205, 164, 92, 0.2); 
+            text-align: center; 
+            width: 90%; 
+            max-width: 400px; 
+        }
+        /* Oculta o sistema principal antes do login */
+        #mainNav, #mainContainer { display: none; }
     </style>
 </head>
 <body onload="carregarDados()">
 
-<nav>
-    <button onclick="verTela('home')">INÍCIO</button>
-    <button onclick="verTela('caixa')">VENDER</button>
-    <button onclick="verTela('pedidos')">PEDIDOS</button>
-    <button onclick="verTela('estoque')">ESTOQUE</button>
-    <button onclick="verTela('financeiro')">FINANCEIRO</button>
-    <button onclick="verTela('gerencial')">GERENCIAL</button>
+<div id="loginScreen">
+    <div class="login-box">
+        <h1 class="home-title" style="font-size: 2.5rem; margin-top: 0;">LOGIN</h1>
+        <p style="color: var(--text-dim); margin-bottom: 20px;">Controle de Acesso</p>
+        
+       <label style="text-align: left; margin-top: 0;">Usuário</label>
+<input type="text" id="loginUser" placeholder="Digite o usuário..." style="text-align: center;">
+        
+        <label style="text-align: left;">Senha de Acesso</label>
+        <input type="password" id="loginPassword" placeholder="Digite a senha..." style="text-align: center; margin-bottom: 20px;">
+        
+        <button class="main-btn btn-gold" onclick="fazerLogin('admin')">ADMINISTRADOR</button>
+        <button class="main-btn btn-outline" style="margin-top: 15px;" onclick="fazerLogin('loja')">VENDA DE PRODUTOS</button>
+    </div>
+</div>
+
+<nav id="mainNav">
+    <button id="btnNavHome" onclick="verTela('home')">INÍCIO</button>
+    <button id="btnNavCaixa" onclick="verTela('caixa')">VENDER</button>
+    <button id="btnNavPedidos" onclick="verTela('pedidos')">PEDIDOS</button>
+    <button id="btnNavEstoque" onclick="verTela('estoque')">ESTOQUE</button>
+    <button id="btnNavFinanceiro" onclick="verTela('financeiro')">FINANCEIRO</button>
+    <button id="btnNavGerencial" onclick="verTela('gerencial')">GERENCIAL</button>
+    <button onclick="sairDoSistema()" style="border-color: var(--danger); color: var(--danger);">SAIR</button>
 </nav>
 
-<div class="container">
+<div class="container" id="mainContainer">
     <div id="home" class="page active">
                 <img src="logo.png" class="logo-home" alt="Logo Almeida JJ">
         <h1 class="home-title">ALMEIDA JJ<br><span style="color: var(--primary); font-size: 0.85em;">PRUDENTE</span></h1>
@@ -314,6 +358,57 @@ Jiu Jitsu mais que um esporte, uma arte marcial.</div>
     let versaoBanco = 0; 
     let inventario = [], historicoVendas = [], historicoRetiradas = [], carrinho = [], saldoLiquido = 0, saldoReserva = 0, saldoBruto = 0;
 
+    // --- LÓGICA DE LOGIN ---
+  function fazerLogin(perfil) {
+    const usuarioDigitado = document.getElementById('loginUser').value; // Captura o usuário
+    const senha = document.getElementById('loginPassword').value;
+    
+    if (perfil === 'admin') {
+        // Exemplo: usuário 'almeidajj' e senha 'ramos'
+        if (usuarioDigitado === 'almeidajj' && senha === 'ramos') {
+            liberarAcesso('admin');
+        } else {
+            alert('❌ Usuário ou Senha de Administrador incorretos!');
+        }
+    } else if (perfil === 'loja') {
+        // Exemplo: usuário 'loja' e senha '123'
+        if (usuarioDigitado === 'loja' && senha === '123') {
+            liberarAcesso('loja');
+        } else {
+            alert('❌ Usuário ou Senha da Loja incorretos!');
+        }
+    }
+}
+
+function sairDoSistema() {
+        if (confirm("Deseja realmente sair do sistema?")) {
+            // Recarrega a página para voltar ao estado inicial (Login)
+            window.location.reload();
+        }
+    }
+    function liberarAcesso(perfil) {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainNav').style.display = 'flex';
+        document.getElementById('mainContainer').style.display = 'block';
+
+        if (perfil === 'loja') {
+            document.getElementById('btnNavHome').style.display = 'none';
+            document.getElementById('btnNavFinanceiro').style.display = 'none';
+            document.getElementById('btnNavGerencial').style.display = 'none';
+            
+            verTela('caixa');
+        } else {
+            document.getElementById('btnNavHome').style.display = '';
+            document.getElementById('btnNavFinanceiro').style.display = '';
+            document.getElementById('btnNavGerencial').style.display = '';
+            
+            verTela('home');
+        }
+        
+        document.getElementById('loginPassword').value = '';
+    }
+    // --- FIM DA LÓGICA DE LOGIN ---
+
     function formatarMoeda(valor) {
         return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
@@ -370,7 +465,6 @@ Jiu Jitsu mais que um esporte, uma arte marcial.</div>
         saldoBruto = calcBruto; saldoLiquido = calcLiq; saldoReserva = calcRes;
     }
 
-    // --- NOVA FUNÇÃO PARA CARREGAR DADOS DO NAVEGADOR (LOCALSTORAGE) ---
     async function carregarDados() {
         try {
             const dadosSalvos = localStorage.getItem('lojaDB');
@@ -396,7 +490,6 @@ Jiu Jitsu mais que um esporte, uma arte marcial.</div>
         base.forEach(i => inventario.push({id: Date.now()+Math.random(), nome: i.n, custo: i.c, venda: i.c * 1.40, vendaBaep: i.c * 1.20, quantidade: 20, estoqueMin: 10}));
     }
 
-    // --- NOVA FUNÇÃO PARA SALVAR DADOS NO NAVEGADOR (LOCALSTORAGE) ---
     async function salvar() {
         recalcularSaldos();
         const pacoteDeDados = { _versao: versaoBanco, inv: inventario, hisV: historicoVendas, hisR: historicoRetiradas, liq: saldoLiquido, res: saldoReserva, bru: saldoBruto };
