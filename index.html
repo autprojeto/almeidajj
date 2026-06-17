@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+    <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#8c6a36">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ALMEIDA JJ</title>
@@ -726,6 +728,12 @@ function sairDoSistema() {
         let nomeOrigem = o === 'bruto' ? 'Caixa Reposição (Custo dos Produtos)' : (o === 'liquido' ? 'Caixa (Lucro Líquido)' : 'Reserva'); historicoRetiradas.push({ id: Date.now(), data: new Date().toLocaleString('pt-BR'), resp: resp, motivo: motivo, valor: v, origemId: o, origem: nomeOrigem, status: 'CONCLUÍDO', justificativa: '' });
         const sucesso = await salvar(); if(sucesso) { document.getElementById('respRetirada').value = ""; document.getElementById('motivoRetirada').value = ""; document.getElementById('valorRetirada').value = ""; atualizarInterface(); alert("Retirada registrada no Banco de Dados local!"); }
     }
+</script>
+    <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+      .then(() => console.log('Service Worker registrado!'));
+  }
 </script>
 </body>
 </html>
