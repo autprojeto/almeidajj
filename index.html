@@ -136,6 +136,37 @@
         }
         /* Oculta o sistema principal antes do login */
         #mainNav, #mainContainer { display: none; }
+
+        /* Toast de confirmação de salvamento */
+        #toastSalvo {
+            visibility: hidden;
+            min-width: 300px;
+            background: #0d2b0d;
+            color: #4caf50;
+            text-align: center;
+            border-radius: 4px;
+            padding: 14px 20px;
+            position: fixed;
+            z-index: 99999;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 1px solid #4caf50;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+            letter-spacing: 1px;
+        }
+        #toastSalvo.show {
+            visibility: visible;
+            animation: toastFade 3s ease forwards;
+        }
+        @keyframes toastFade {
+            0%   { opacity: 0; bottom: 15px; }
+            15%  { opacity: 1; bottom: 30px; }
+            75%  { opacity: 1; bottom: 30px; }
+            100% { opacity: 0; bottom: 15px; }
+        }
     </style>
 </head>
 <body onload="carregarDados()">
@@ -345,6 +376,8 @@ Jiu Jitsu mais que um esporte, uma arte marcial.</div>
 <div id="modalCancel" class="modal"><div class="modal-content" style="border-color: var(--danger);"><h3 style="color:var(--danger); font-family:'Cinzel', serif; text-align:center; margin-top: 0;">CANCELAR PEDIDO</h3><label style="color:#fff;">Motivo:</label><textarea id="motivoCancel" rows="4"></textarea><input type="hidden" id="idPedidoCancel"><button class="main-btn btn-red" onclick="confirmarCancelamento()">CONFIRMAR</button><button class="main-btn btn-outline" onclick="fecharModalCancel()">VOLTAR</button></div></div>
 <div id="modalCancelRetirada" class="modal"><div class="modal-content" style="border-color: var(--danger);"><h3 style="color:var(--danger); font-family:'Cinzel', serif; text-align:center; margin-top: 0;">CANCELAR RETIRADA</h3><label style="color:#fff;">Motivo:</label><textarea id="motivoCancelRetirada" rows="4"></textarea><input type="hidden" id="idRetiradaCancel"><button class="main-btn btn-red" onclick="confirmarCancelamentoRetirada()">CONFIRMAR</button><button class="main-btn btn-outline" onclick="fecharModalCancelRetirada()">VOLTAR</button></div></div>
 
+<div id="toastSalvo">✅ Dados salvos com sucesso no servidor!</div>
+
 <div id="modalEditOrder" class="modal">
     <div class="modal-content" style="border-color: var(--primary);">
         <h3 style="color:var(--primary); font-family:'Cinzel', serif; text-align:center; margin-top: 0;">EDITAR CABEÇALHO PEDIDO (CLIENTE/PAGTO)</h3>
@@ -529,17 +562,23 @@ Jiu Jitsu mais que um esporte, uma arte marcial.</div>
         recalcularSaldos();
         const pacoteDeDados = { _versao: versaoBanco, inv: inventario, hisV: historicoVendas, hisR: historicoRetiradas, liq: saldoLiquido, res: saldoReserva, bru: saldoBruto };
         try {
-            if (window.FIREBASE_HABILITADO && window.db) {
-                await window.db.collection('dados').doc('lojaDB').set(pacoteDeDados);
-            }
-            localStorage.setItem('lojaDB', JSON.stringify(pacoteDeDados));
-            versaoBanco++; 
-            return true; 
-        } catch (e) { 
-            console.error(e); 
-            alert("❌ ERRO AO SALVAR: Verifique a conexão com o servidor ou o armazenamento local."); 
-            return false; 
+            await window.db.collection('dados').doc('lojaDB').set(pacoteDeDados);
+            versaoBanco++;
+            mostrarToastSalvo();
+            return true;
+        } catch (e) {
+            console.error(e);
+            alert("❌ ERRO AO SALVAR!\n\nNão foi possível salvar os dados no servidor.\nVerifique sua conexão com a internet e tente novamente.");
+            return false;
         }
+    }
+
+    function mostrarToastSalvo() {
+        const toast = document.getElementById('toastSalvo');
+        toast.classList.remove('show');
+        void toast.offsetWidth;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
     function calcularMargemAutomatica() { const custo = parseFloat(document.getElementById('custoProd').value); if (!isNaN(custo)) { document.getElementById('vendaProd').value = (custo * 1.40).toFixed(2); document.getElementById('vendaBaepProd').value = (custo * 1.20).toFixed(2); } }
