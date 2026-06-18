@@ -42,8 +42,9 @@ window.CREDENCIAIS_LOCAIS = {
 // O "usuario" digitado na tela é mapeado para o e-mail cadastrado
 // no Firebase Authentication, e o "role" define o nível de acesso.
 window.USUARIOS_CONFIG = {
-    'almeidajj': { email: 'ramos@almeidajj.loja', role: 'admin' },
-    'loja':      { email: 'loja@almeidajj.loja',  role: 'loja'  }
+    'almeidajj':                { email: 'ramosalmeidajj@gmail.com', role: 'admin' },
+    'ramosalmeidajj@gmail.com': { email: 'ramosalmeidajj@gmail.com', role: 'admin' },
+    'loja':                     { email: 'loja@almeidajj.loja',      role: 'loja'  }
 };
 
 // --- CONFIGURAÇÃO DO PROJETO FIREBASE ---
