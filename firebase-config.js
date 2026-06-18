@@ -42,7 +42,7 @@ window.CREDENCIAIS_LOCAIS = {
 // O "usuario" digitado na tela é mapeado para o e-mail cadastrado
 // no Firebase Authentication, e o "role" define o nível de acesso.
 window.USUARIOS_CONFIG = {
-    'almeidajj': { email: 'admin@almeidajj.loja', role: 'admin' },
+    'almeidajj': { email: 'ramos@almeidajj.loja', role: 'admin' },
     'loja':      { email: 'loja@almeidajj.loja',  role: 'loja'  }
 };
 
