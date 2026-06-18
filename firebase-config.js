@@ -28,7 +28,7 @@
 // ================================================================
 
 // --- MODO DE OPERAÇÃO ---
-const FIREBASE_HABILITADO = false; // ← Mude para true ao usar Firebase
+const FIREBASE_HABILITADO = true;
 
 // --- CREDENCIAIS LOCAIS (usadas quando FIREBASE_HABILITADO = false) ---
 // IMPORTANTE: Altere as senhas padrão antes de usar em produção!
