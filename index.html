@@ -433,10 +433,17 @@ Jiu Jitsu mais que um esporte, uma arte marcial.</div>
 
     function sairDoSistema() {
         if (confirm("Deseja realmente sair do sistema?")) {
+            const voltarParaLogin = () => {
+                document.getElementById('loginScreen').style.display = 'flex';
+                document.getElementById('mainNav').style.display = 'none';
+                document.getElementById('mainContainer').style.display = 'none';
+                document.getElementById('loginUser').value = '';
+                document.getElementById('loginPassword').value = '';
+            };
             if (window.FIREBASE_HABILITADO && window.auth) {
-                window.auth.signOut().then(() => window.location.reload());
+                window.auth.signOut().then(voltarParaLogin);
             } else {
-                window.location.reload();
+                voltarParaLogin();
             }
         }
     }
