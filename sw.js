@@ -1,7 +1,8 @@
-const CACHE_NAME = 'almeida-jj-v1';
+const CACHE_NAME = 'almeida-jj-v2';
 const ASSETS = [
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './firebase-config.js'
 ];
 
 self.addEventListener('install', (e) => {

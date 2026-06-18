@@ -11,6 +11,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
+    <!-- Firebase SDK — carregado antes do firebase-config.js -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <!-- Configurações de segurança e credenciais (edite firebase-config.js) -->
+    <script src="firebase-config.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Montserrat:wght@400;600;800&display=swap');
 
@@ -361,31 +368,43 @@ Jiu Jitsu mais que um esporte, uma arte marcial.</div>
     let inventario = [], historicoVendas = [], historicoRetiradas = [], carrinho = [], saldoLiquido = 0, saldoReserva = 0, saldoBruto = 0;
 
     // --- LÓGICA DE LOGIN ---
-  function fazerLogin(perfil) {
-    const usuarioDigitado = document.getElementById('loginUser').value; // Captura o usuário
-    const senha = document.getElementById('loginPassword').value;
-    
-    if (perfil === 'admin') {
-        // Exemplo: usuário 'almeidajj' e senha 'ramos'
-        if (usuarioDigitado === 'almeidajj' && senha === 'ramos') {
-            liberarAcesso('admin');
+    async function fazerLogin(perfil) {
+        const usuarioDigitado = document.getElementById('loginUser').value.trim();
+        const senha = document.getElementById('loginPassword').value;
+        const msgErro = '❌ Usuário ou Senha de ' + (perfil === 'admin' ? 'Administrador' : 'da Loja') + ' incorretos!';
+
+        if (window.FIREBASE_HABILITADO && window.auth) {
+            // Autenticação via Firebase Authentication (senhas gerenciadas na nuvem)
+            const userConfig = window.USUARIOS_CONFIG && window.USUARIOS_CONFIG[usuarioDigitado];
+            if (!userConfig || userConfig.role !== perfil) {
+                alert(msgErro);
+                return;
+            }
+            try {
+                await window.auth.signInWithEmailAndPassword(userConfig.email, senha);
+                await carregarDados();
+                liberarAcesso(perfil);
+            } catch (e) {
+                alert(msgErro);
+            }
         } else {
-            alert('❌ Usuário ou Senha de Administrador incorretos!');
-        }
-    } else if (perfil === 'loja') {
-        // Exemplo: usuário 'loja' e senha '123'
-        if (usuarioDigitado === 'loja' && senha === '123') {
-            liberarAcesso('loja');
-        } else {
-            alert('❌ Usuário ou Senha da Loja incorretos!');
+            // Autenticação local — credenciais definidas em firebase-config.js
+            const creds = window.CREDENCIAIS_LOCAIS && window.CREDENCIAIS_LOCAIS[perfil];
+            if (creds && usuarioDigitado === creds.usuario && senha === creds.senha) {
+                liberarAcesso(perfil);
+            } else {
+                alert(msgErro);
+            }
         }
     }
-}
 
-function sairDoSistema() {
+    function sairDoSistema() {
         if (confirm("Deseja realmente sair do sistema?")) {
-            // Recarrega a página para voltar ao estado inicial (Login)
-            window.location.reload();
+            if (window.FIREBASE_HABILITADO && window.auth) {
+                window.auth.signOut().then(() => window.location.reload());
+            } else {
+                window.location.reload();
+            }
         }
     }
     function liberarAcesso(perfil) {
@@ -469,9 +488,23 @@ function sairDoSistema() {
 
     async function carregarDados() {
         try {
-            const dadosSalvos = localStorage.getItem('lojaDB');
-            if (dadosSalvos) { 
-                const dados = JSON.parse(dadosSalvos);
+            let dados = null;
+
+            if (window.FIREBASE_HABILITADO && window.db) {
+                try {
+                    const doc = await window.db.collection('dados').doc('lojaDB').get();
+                    if (doc.exists) dados = doc.data();
+                } catch (e) {
+                    console.warn('Firestore indisponível, usando dados locais como fallback.', e);
+                }
+            }
+
+            if (!dados) {
+                const dadosSalvos = localStorage.getItem('lojaDB');
+                if (dadosSalvos) dados = JSON.parse(dadosSalvos);
+            }
+
+            if (dados) { 
                 versaoBanco = dados._versao || 1; 
                 inventario = dados.inv || []; 
                 historicoVendas = dados.hisV || []; 
@@ -483,7 +516,7 @@ function sairDoSistema() {
             atualizarInterface();
         } catch (erro) { 
             console.error(erro); 
-            alert("🚨 ERRO: Não foi possível carregar os dados locais do seu navegador."); 
+            alert("🚨 ERRO: Não foi possível carregar os dados do sistema."); 
         }
     }
 
@@ -496,12 +529,15 @@ function sairDoSistema() {
         recalcularSaldos();
         const pacoteDeDados = { _versao: versaoBanco, inv: inventario, hisV: historicoVendas, hisR: historicoRetiradas, liq: saldoLiquido, res: saldoReserva, bru: saldoBruto };
         try {
+            if (window.FIREBASE_HABILITADO && window.db) {
+                await window.db.collection('dados').doc('lojaDB').set(pacoteDeDados);
+            }
             localStorage.setItem('lojaDB', JSON.stringify(pacoteDeDados));
             versaoBanco++; 
             return true; 
         } catch (e) { 
             console.error(e); 
-            alert("❌ ERRO AO SALVAR: O armazenamento do navegador pode estar cheio."); 
+            alert("❌ ERRO AO SALVAR: Verifique a conexão com o servidor ou o armazenamento local."); 
             return false; 
         }
     }
