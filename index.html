@@ -810,6 +810,22 @@ Jiu Jitsu mais que um esporte, uma arte marcial.</div>
         let nomeOrigem = o === 'bruto' ? 'Caixa Reposição (Custo dos Produtos)' : (o === 'liquido' ? 'Caixa (Lucro Líquido)' : 'Reserva'); historicoRetiradas.push({ id: Date.now(), data: new Date().toLocaleString('pt-BR'), resp: resp, motivo: motivo, valor: v, origemId: o, origem: nomeOrigem, status: 'CONCLUÍDO', justificativa: '' });
         const sucesso = await salvar(); if(sucesso) { document.getElementById('respRetirada').value = ""; document.getElementById('motivoRetirada').value = ""; document.getElementById('valorRetirada').value = ""; atualizarInterface(); alert("Retirada registrada no Banco de Dados local!"); }
     }
+
+    // Restaura a sessão automaticamente quando o usuário atualiza a página
+    if (window.FIREBASE_HABILITADO && window.auth) {
+        window.auth.onAuthStateChanged(async (usuario) => {
+            const jaLogado = document.getElementById('mainNav').style.display === 'flex';
+            if (usuario && !jaLogado) {
+                const config = Object.values(window.USUARIOS_CONFIG || {}).find(u => u.email === usuario.email);
+                if (config) {
+                    await carregarDados();
+                    liberarAcesso(config.role);
+                } else {
+                    window.auth.signOut();
+                }
+            }
+        });
+    }
 </script>
     <script>
   if ('serviceWorker' in navigator) {
