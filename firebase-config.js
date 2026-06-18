@@ -49,12 +49,12 @@ window.USUARIOS_CONFIG = {
 // --- CONFIGURAÇÃO DO PROJETO FIREBASE ---
 // Preencha com os dados do seu projeto (aba "Configurações do projeto")
 const firebaseConfig = {
-    apiKey:            "SUA_API_KEY_AQUI",
-    authDomain:        "SEU-PROJETO.firebaseapp.com",
-    projectId:         "SEU-PROJETO-ID",
-    storageBucket:     "SEU-PROJETO.appspot.com",
-    messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-    appId:             "SEU_APP_ID"
+    apiKey:            "AIzaSyD06IVdr_fzxDqVtC2e0unfwaPjlS1tFJY",
+    authDomain:        "almeidajj-pdv.firebaseapp.com",
+    projectId:         "almeidajj-pdv",
+    storageBucket:     "almeidajj-pdv.firebasestorage.app",
+    messagingSenderId: "208828986631",
+    appId:             "1:208828986631:web:7796bb249fb3bf334a41a2"
 };
 
 // --- INICIALIZAÇÃO ---
